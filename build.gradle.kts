@@ -1,10 +1,11 @@
 /*
  *     UniPub: build.gradle.kts
- *     Copyright (C) 2025 mtctx
+ *     Copyright (C) 2025  mtctx
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
- *     the Free Software Foundation, either version 3 of the License.
+ *     the Free Software Foundation, either version 3 of the License, or
+ *     (at your option) any later version.
  *
  *     This program is distributed in the hope that it will be useful,
  *     but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -16,18 +17,61 @@
  */
 
 plugins {
+    `kotlin-dsl`
     kotlin("jvm") version "2.2.0"
+    kotlin("plugin.serialization") version "2.2.0"
+    id("com.gradle.plugin-publish") version "1.2.1"
+    id("org.jetbrains.dokka") version "2.0.0"
 }
 
-group = "me.mtctx.library"
-version = "1.0-SNAPSHOT"
+group = "dev.mtctx.library"
+version = "1.0.0"
 
 repositories {
     mavenCentral()
+    gradlePluginPortal()
 }
 
 dependencies {
+    implementation("com.charleskorn.kaml:kaml:0.95.0")
     testImplementation(kotlin("test"))
+}
+
+gradlePlugin {
+    website = "https://github.com/mtctxs/UniPub"
+    vcsUrl = "https://github.com/mtctxs/UniPub.git"
+
+    plugins {
+        create("unipub") {
+            id = "dev.mtctx.unipub"
+            displayName = "UniPub"
+            description = "A Gradle plugin for publishing to Maven Repositories."
+            implementationClass = "dev.mtctx.library.UniPubKt"
+            tags = listOf("maven", "central", "publishing")
+        }
+    }
+}
+
+dokka {
+    dokkaPublications.html {
+        outputDirectory.set(layout.buildDirectory.dir("dokka"))
+    }
+
+    dokkaSourceSets.configureEach {
+        includes.from("README.md")
+        jdkVersion.set(21)
+        sourceLink {
+            localDirectory.set(file("src/main/kotlin"))
+            remoteUrl.set(uri("https://github.com/mtctxs/UniPub/tree/main/src/main/kotlin"))
+            remoteLineSuffix.set("#L")
+        }
+    }
+}
+
+tasks.register<Copy>("publishDokka") {
+    dependsOn("dokkaGenerate")
+    from(layout.buildDirectory.dir("dokka"))
+    into("docs/") // For GitHub Pages
 }
 
 tasks.test {
