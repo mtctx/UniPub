@@ -1,6 +1,7 @@
 name: Deploy Dokka Documentation
 
 on:
+  workflow_dispatch:
   pull_request:
     types: [ closed ]
     branches: [ main, master ]
