@@ -46,7 +46,7 @@ gradlePlugin {
             id = "dev.mtctx.unipub"
             displayName = "UniPub"
             description = "A Gradle plugin for publishing to Maven Repositories."
-            implementationClass = "dev.mtctx.library.UniPubKt"
+            implementationClass = "dev.mtctx.unipub.UniPubKt"
             tags = listOf("maven", "central", "publishing")
         }
     }
@@ -80,3 +80,4 @@ tasks.test {
 kotlin {
     jvmToolchain(21)
 }
+
