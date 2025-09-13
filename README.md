@@ -22,7 +22,7 @@ is hosted.
 plugins {
     id("dev.mtctx.unipub") version "LATEST_VERSION"
 }
-```
+``` 
 
 ### 2\. Create the Settings File
 

@@ -1,6 +1,6 @@
 /*
  *     UniPub: License.kt
- *     Copyright (C) 2025  mtctx
+ *     Copyright (C) 2025 mtctx
  *
  *     This program is free software: you can redistribute it and/or modify
  *     it under the terms of the GNU General Public License as published by
@@ -61,9 +61,7 @@ sealed interface License {
 
         @JvmStatic
         val MIT = LicenseInfo(
-            _name = "MIT License",
-            _url = "https://opensource.org/licenses/MIT",
-            _distribution = Distribution.REPO
+            _name = "MIT License", _url = "https://opensource.org/licenses/MIT", _distribution = Distribution.REPO
         )
 
         @JvmStatic
@@ -75,9 +73,7 @@ sealed interface License {
 
         @JvmStatic
         val UNLICENSE = LicenseInfo(
-            _name = "The Unlicense",
-            _url = "https://unlicense.org/",
-            _distribution = Distribution.REPO
+            _name = "The Unlicense", _url = "https://unlicense.org/", _distribution = Distribution.REPO
         )
 
         @JvmStatic
@@ -89,11 +85,7 @@ sealed interface License {
     }
 
     enum class Distribution(val value: String) {
-        REPO("repo"),
-        SRC("src"),
-        BINARY("binary"),
-        MANUAL("manual"),
-        MANUAL_DOWNLOAD("manual-download"),
+        REPO("repo"), SRC("src"), BINARY("binary"), MANUAL("manual"), MANUAL_DOWNLOAD("manual-download"),
     }
 }
 
