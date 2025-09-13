@@ -18,6 +18,20 @@
 
 package dev.mtctx.unipub
 
+import org.gradle.api.publish.maven.MavenPublication
+import org.gradle.api.tasks.TaskProvider
+
+sealed class ArtifactInfo {
+    data class Component(val componentName: String) : ArtifactInfo()
+    data class Task(val task: TaskProvider<*>) : ArtifactInfo()
+    data class File(val file: java.io.File, val classifier: String? = null) : ArtifactInfo()
+    data class Custom(
+        val classifier: String? = null,
+        val extension: String? = null,
+        val configure: (MavenPublication) -> Unit
+    ) : ArtifactInfo()
+}
+
 data class ProjectInfo(
     private val _name: String,
     private val _id: String,

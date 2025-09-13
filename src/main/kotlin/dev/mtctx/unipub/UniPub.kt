@@ -21,8 +21,10 @@ package dev.mtctx.unipub
 import com.charleskorn.kaml.Yaml
 import dev.mtctx.unipub.task.UniPubGenerateTemplateSettingsInHomeDirTask
 import dev.mtctx.unipub.task.UniPubGenerateTemplateSettingsInProjectDirTask
+import org.gradle.api.GradleException
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.UnknownTaskException
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.kotlin.dsl.create
@@ -56,28 +58,47 @@ class UniPub : Plugin<Project> {
         }
 
         target.afterEvaluate {
-            val (projectInfo, developerInfos) = validateExtensionConfiguration(extension)
+            val (projectInfo, developerInfos) = extension.projectAndDeveloperInfos()
+            var artifactInfos = extension.artifactInfos().toMutableList()
+
+            require(developerInfos.isNotEmpty()) {
+                "UniPub 'developer' list cannot be empty. Please add at least one developer."
+            }
+            if (artifactInfos.isEmpty()) artifactInfos = mutableListOf(
+                ArtifactInfo.Component("java"),
+                ArtifactInfo.Task(tasks.named("sourcesJar")),
+                ArtifactInfo.Task(tasks.named("javadocJar"))
+            )
+
             val settings = loadAndValidateSettingsFile(extension)
 
-            configurePublishing(settings, projectInfo, developerInfos)
+            val artifactsToRemove = mutableListOf<ArtifactInfo>()
+            artifactInfos.filterIsInstance<ArtifactInfo.Component>()
+                .apply { if (!any { it.componentName == "java" }) logger.warn("The 'java' Component is not included in your artifact list!") }
+                .forEach { artifact ->
+                    if (!components.names.contains(artifact.componentName)) {
+                        logger.warn("Component '${artifact.componentName}' not found. Skipping.")
+                        artifactsToRemove.add(artifact)
+                    }
+                }
+
+            artifactInfos.filterIsInstance<ArtifactInfo.Task>()
+                .apply {
+                    if (!any { it.task.name == "sourcesJar" }) logger.warn("The 'sourcesJar' Task is not included in your artifact list!")
+                    if (!any { it.task.name == "javadocJar" }) logger.warn("The 'javadocJar' Task is not included in your artifact list!")
+                }
+                .forEach { artifact ->
+                    if (tasks.findByName(artifact.task.name) == null) {
+                        logger.warn("Task '${artifact.task.name}' not found. Skipping.")
+                        artifactsToRemove.add(artifact)
+                    }
+                }
+
+            artifactInfos.removeAll(artifactsToRemove)
+
+            configurePublishing(settings, projectInfo, developerInfos, artifactInfos)
             configureSigning(settings)
         }
-    }
-
-    private fun validateExtensionConfiguration(extension: UniPubExtension): Pair<ProjectInfo, List<DeveloperInfo>> {
-        require(extension.project.isPresent) {
-            "UniPub 'project' info is not configured. Please configure the 'unipub' extension in your build script."
-        }
-        require(extension.developer.isPresent) {
-            "UniPub 'developer' info is not configured. Please configure the 'unipub' extension in your build script."
-        }
-        val projectInfo = extension.project.get()
-        val developerInfos = extension.developer.get()
-
-        require(developerInfos.isNotEmpty()) {
-            "UniPub 'developer' list cannot be empty."
-        }
-        return projectInfo to developerInfos
     }
 
     private fun loadAndValidateSettingsFile(extension: UniPubExtension): UniPubSettings {
@@ -98,7 +119,8 @@ class UniPub : Plugin<Project> {
     private fun Project.configurePublishing(
         settings: UniPubSettings,
         projectInfo: ProjectInfo,
-        developerInfos: List<DeveloperInfo>
+        developerInfos: List<DeveloperInfo>,
+        artifactInfos: List<ArtifactInfo>,
     ) {
         extensions.getByType<PublishingExtension>().apply {
             repositories {
@@ -115,6 +137,39 @@ class UniPub : Plugin<Project> {
             }
 
             publications.withType<MavenPublication> {
+                groupId = projectInfo.groupId
+                artifactId = projectInfo.id
+                version = projectInfo.version
+
+                artifactInfos.forEach { artifactInfo ->
+                    when (artifactInfo) {
+                        is ArtifactInfo.Component -> {
+                            val component = components.findByName(artifactInfo.componentName)
+                            if (component != null) {
+                                from(component)
+                            } else {
+                                logger.warn("Component '${artifactInfo.componentName}' not found during publication")
+                            }
+                        }
+
+                        is ArtifactInfo.Task ->
+                            try {
+                                artifact(artifactInfo.task)
+                            } catch (e: UnknownTaskException) {
+                                logger.error("Task not found: ${artifactInfo.task.name}")
+                                logger.trace("Stacktrace: ", e)
+                            }
+
+                        is ArtifactInfo.File ->
+                            artifact(artifactInfo.file) {
+                                artifactInfo.classifier?.let { classifier = it }
+                            }
+
+                        is ArtifactInfo.Custom ->
+                            artifactInfo.configure(this)
+                    }
+                }
+
                 pom {
                     name.set(projectInfo.name)
                     description.set(projectInfo.description)
@@ -149,18 +204,23 @@ class UniPub : Plugin<Project> {
         }
     }
 
+    @Throws(GradleException::class)
     private fun Project.configureSigning(settings: UniPubSettings) {
+        val publishing = extensions.getByType<PublishingExtension>()
         extensions.getByType<SigningExtension>().apply {
-            useInMemoryPgpKeys(
-                settings.gpgKey.keyId,
-                settings.gpgKey.privateKey,
-                settings.gpgKey.passphrase
-            )
-            sign(extensions.getByType<PublishingExtension>().publications)
+            if (settings.gpgKey.keyId.isNotBlank() && settings.gpgKey.privateKey.isNotBlank()) {
+                useInMemoryPgpKeys(
+                    settings.gpgKey.keyId,
+                    settings.gpgKey.privateKey,
+                    settings.gpgKey.passphrase
+                )
+                sign(publishing.publications)
+            } else throw GradleException("GPG key not configured properly. Exiting.")
         }
     }
 }
 
+@Throws(IllegalStateException::class)
 fun String.resolveEnv(): String =
     if (startsWith("ENV(") && endsWith(")")) {
         val envKey = removePrefix("ENV(").removeSuffix(")")
