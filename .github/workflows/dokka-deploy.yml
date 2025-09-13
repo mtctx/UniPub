@@ -37,7 +37,7 @@ jobs:
           cache-write-only: ${{ github.event_name == 'push' }}
 
       - name: Generate Dokka documentation
-        run: ./gradlew dokkaHtml
+        run: ./gradlew dokkaGenerate
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

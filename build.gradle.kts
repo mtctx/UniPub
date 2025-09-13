@@ -68,12 +68,6 @@ dokka {
     }
 }
 
-tasks.register<Copy>("publishDokka") {
-    dependsOn("dokkaGenerate")
-    from(layout.buildDirectory.dir("dokka"))
-    into("docs/") // For GitHub Pages
-}
-
 tasks.test {
     useJUnitPlatform()
 }
