@@ -25,7 +25,7 @@ plugins {
 }
 
 group = "dev.mtctx.library"
-version = "1.0.0"
+version = "1.0.1"
 
 repositories {
     mavenCentral()
@@ -58,7 +58,6 @@ dokka {
     }
 
     dokkaSourceSets.configureEach {
-        includes.from("README.md")
         jdkVersion.set(21)
         sourceLink {
             localDirectory.set(file("src/main/kotlin"))
