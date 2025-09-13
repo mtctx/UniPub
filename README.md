@@ -62,12 +62,18 @@ gpgKey:
 Finally, configure the `unipub` extension in your `build.gradle.kts`. Here you will define all the public metadata for
 your project, such as its name, description, developers, and license.
 
+<details>
+<summary>Minimal `build.gradle.kts` setup</summary>
+
 ```kotlin
 // build.gradle.kts
 
 import dev.mtctx.unipub.License
 
-// ... plugins block
+plugins {
+    // other plugins
+    id("dev.mtctx.unipub") version "LATEST_VERSION"
+}
 
 unipub {
     // If you used a custom name or location for the settings file
@@ -78,17 +84,13 @@ unipub {
         name = "My Awesome Library"
         id = "awesome-lib"
         description = "A library that does awesome things."
-        version = "1.0.0"
         inceptionYear = "2025"
-        groupId = "com.example"
         url = "https://github.com/example/awesome-lib"
 
         licenses = listOf(License.APACHE_2_0)
 
         scm {
             url = "https://github.com/example/awesome-lib"
-            connection = "scm:git:git://github.com/example/awesome-lib.git"
-            developerConnection = "scm:git:ssh://github.com/example/awesome-lib.git"
         }
     }
 
@@ -96,22 +98,91 @@ unipub {
         developer {
             name = "Jane Doe"
             email = "jane.doe@example.com"
-            organization = "Example Inc."
-            organizationUrl = "https://www.example.com"
         }
-    }
-
-    // This block is optional. UniPub includes the java component,
-    // sourcesJar, and javadocJar by default.
-    // They are automatically removed when you add your own artifacts
-    // or if gradle doesn't provide them.
-    artifacts {
-        component("java")
-        task(tasks.named("sourcesJar"))
-        task(tasks.named("javadocJar"))
     }
 }
 ```
+
+</details>
+
+<details>
+<summary>Full-featured `build.gradle.kts` setup (almost)</summary>
+
+```kotlin
+// build.gradle.kts
+import dev.mtctx.unipub.License
+
+plugins {
+    // other plugins
+    id("dev.mtctx.unipub") version "LATEST_VERSION"
+}
+
+unipub {
+    // Custom settings file location (optional)
+    uniPubSettingsFile.set("${project.projectDir}/config/production.unipub")
+
+    project {
+        name = "ENV(PROJECT_NAME)" // Using environment variable
+        id = "awesome-library"
+        description = "A comprehensive library providing advanced distributed systems functionality"
+        version = "2.0.0" // Override project version
+        inceptionYear = "2023"
+        groupId = "com.corporate.awesome" // Override project group
+        url = "https://github.com/corporate/awesome-library"
+
+        // Multiple licenses
+        licenses = listOf(
+            License.APACHE_2_0,
+            License.MIT
+        )
+
+        scm {
+            url = "https://github.com/corporate/awesome-library"
+            connection = "scm:git:git@github.com:corporate/awesome-library.git"
+            developerConnection = "scm:git:ssh://git@github.com:corporate/awesome-library.git"
+        }
+    }
+
+    developers {
+        developer {
+            name = "Dr. Jane Smith"
+            email = "jane.smith@corporate.com"
+            organization = "Awesome Corp R&D"
+            organizationUrl = "https://rd.awesome-corp.com"
+        }
+
+        developer {
+            name = "John Developer"
+            email = "john.developer@corporate.com"
+            organization = "Awesome Corp Engineering"
+            organizationUrl = "https://engineering.awesome-corp.com"
+        }
+    }
+
+    artifacts {
+        // Multiple components
+        component("java")
+        component("kotlin")
+
+        // Standard tasks
+        task(tasks.named("sourcesJar"))
+        task(tasks.named("javadocJar"))
+
+        // Custom file artifact
+        file(file("docs/API_GUIDE.md"), "documentation")
+
+        // Custom artifact configuration
+        custom(classifier = "metrics", extension = "json") { publication ->
+            publication.artifact(tasks.named("generateMetrics")) {
+                classifier = "performance-metrics"
+                extension = "json"
+            }
+        }
+    }
+}
+```
+
+</details>
 
 With this configuration in place, you can now publish your project by running the standard Gradle `publish` task.
 

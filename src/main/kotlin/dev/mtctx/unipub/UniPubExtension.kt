@@ -21,6 +21,7 @@ package dev.mtctx.unipub
 import dev.mtctx.unipub.dsl.ArtifactsBuilder
 import dev.mtctx.unipub.dsl.DevelopersBuilder
 import dev.mtctx.unipub.dsl.ProjectBuilder
+import org.gradle.api.Project
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.kotlin.dsl.property
@@ -28,7 +29,7 @@ import javax.inject.Inject
 import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
 
-abstract class UniPubExtension @Inject constructor(objects: ObjectFactory) {
+abstract class UniPubExtension @Inject constructor(objects: ObjectFactory, private val project: Project) {
     private val projectInfo = objects.property<ProjectInfo>()
     private val developerInfos = mutableListOf<DeveloperInfo>()
     private val artifactInfos = mutableListOf<ArtifactInfo>()
@@ -45,6 +46,10 @@ abstract class UniPubExtension @Inject constructor(objects: ObjectFactory) {
     fun project(block: ProjectBuilder.() -> Unit) {
         val builder = ProjectBuilder()
         builder.block()
+        builder.apply {
+            if (version.isBlank()) version = project.version.toString()
+            if (groupId.isBlank()) groupId = project.group.toString()
+        }
         projectInfo.set(builder.build())
     }
 

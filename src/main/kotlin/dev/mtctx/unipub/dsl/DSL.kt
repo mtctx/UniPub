@@ -68,7 +68,8 @@ class ProjectBuilder {
     fun build(): ProjectInfo {
         require(name.isNotBlank()) { "Project name cannot be blank." }
         require(id.isNotBlank()) { "Project ID cannot be blank." }
-        require(groupId.isNotBlank()) { "Project group ID cannot be blank." }
+        require(description.isNotBlank()) { "Project description cannot be blank." }
+        require(inceptionYear.isNotBlank()) { "Project inception year cannot be blank." }
         require(url.isNotBlank()) { "Project URL cannot be blank." }
         require(licenses.isNotEmpty()) { "Project Licenses cannot be empty." }
 
@@ -94,8 +95,8 @@ class ScmBuilder {
 
     fun build(): ProjectInfo.SCM {
         require(url.isNotBlank()) { "SCM URL cannot be blank." }
-        require(connection.isNotBlank()) { "SCM connection cannot be blank." }
-        require(developerConnection.isNotBlank()) { "SCM developer connection cannot be blank." }
+        if (connection.isBlank()) connection = buildUrl(url, "git")
+        if (developerConnection.isBlank()) connection = buildUrl(url, "ssh")
 
         return ProjectInfo.SCM(
             _url = url,
@@ -103,6 +104,9 @@ class ScmBuilder {
             _developerConnection = developerConnection
         )
     }
+
+    private fun buildUrl(url: String, newProtocol: String): String =
+        "scm:git:${url.replaceFirst("https://", "$newProtocol://").replaceFirst("http://", "$newProtocol://")}.git"
 }
 
 class DevelopersBuilder {
