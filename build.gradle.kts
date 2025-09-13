@@ -24,7 +24,7 @@ plugins {
     id("org.jetbrains.dokka") version "2.0.0"
 }
 
-group = "dev.mtctx.library"
+group = "dev.mtctx.unipub"
 version = "1.0.1"
 
 repositories {

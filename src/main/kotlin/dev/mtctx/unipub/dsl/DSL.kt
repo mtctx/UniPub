@@ -96,7 +96,7 @@ class ScmBuilder {
     fun build(): ProjectInfo.SCM {
         require(url.isNotBlank()) { "SCM URL cannot be blank." }
         if (connection.isBlank()) connection = buildUrl(url, "git")
-        if (developerConnection.isBlank()) connection = buildUrl(url, "ssh")
+        if (developerConnection.isBlank()) developerConnection = buildUrl(url, "ssh")
 
         return ProjectInfo.SCM(
             _url = url,
