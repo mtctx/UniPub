@@ -25,7 +25,7 @@ plugins {
 }
 
 group = "dev.mtctx.unipub"
-version = "1.0.1"
+version = "1.0.0"
 
 repositories {
     mavenCentral()
@@ -38,8 +38,8 @@ dependencies {
 }
 
 gradlePlugin {
-    website = "https://github.com/mtctxs/UniPub"
-    vcsUrl = "https://github.com/mtctxs/UniPub.git"
+    website = "https://github.com/mtctx/UniPub"
+    vcsUrl = "https://github.com/mtctx/UniPub.git"
 
     plugins {
         create("unipub") {
@@ -47,7 +47,16 @@ gradlePlugin {
             displayName = "UniPub"
             description = "A Gradle plugin for publishing to Maven Repositories."
             implementationClass = "dev.mtctx.unipub.UniPubKt"
-            tags = listOf("maven", "central", "publishing")
+            tags = listOf(
+                "maven",
+                "central",
+                "publishing",
+                "library",
+                "publish",
+                "publish to maven repositories",
+                "maven repository",
+                "maven repositories"
+            )
         }
     }
 }
@@ -61,7 +70,7 @@ dokka {
         jdkVersion.set(21)
         sourceLink {
             localDirectory.set(file("src/main/kotlin"))
-            remoteUrl.set(uri("https://github.com/mtctxs/UniPub/tree/main/src/main/kotlin"))
+            remoteUrl.set(uri("https://github.com/mtctx/UniPub/"))
             remoteLineSuffix.set("#L")
         }
     }
@@ -73,4 +82,3 @@ tasks.test {
 kotlin {
     jvmToolchain(21)
 }
-
