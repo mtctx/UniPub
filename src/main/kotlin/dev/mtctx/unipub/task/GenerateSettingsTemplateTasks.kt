@@ -45,7 +45,7 @@ open class UniPubGenerateTemplateSettingsInProjectDirTask : UniPubGenerateTempla
     }
 }
 
-class UniPubGenerateTemplateSettingsInHomeDirTask : UniPubGenerateTemplateSettingsTask() {
+open class UniPubGenerateTemplateSettingsInHomeDirTask : UniPubGenerateTemplateSettingsTask() {
     override fun file(profileName: String): File =
         Path(System.getProperty("user.home"), ".unipub", "$profileName.unipub").toFile().apply { parentFile.mkdirs() }
 }
