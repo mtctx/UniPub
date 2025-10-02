@@ -133,7 +133,7 @@ class UniPub : Plugin<Project> {
                 settings.repositories.forEach { repository ->
                     maven {
                         name = repository.name
-                        url = uri(repository.url)
+                        url = repository.uri
                         credentials {
                             username = repository.username
                             password = repository.password

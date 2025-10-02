@@ -18,8 +18,10 @@
 
 package dev.mtctx.unipub
 
+import dev.mtctx.unipub.serializer.URISerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import java.net.URI
 
 @Serializable
 data class UniPubSettings(
@@ -35,27 +37,28 @@ data class UniPubSettings(
         @SerialName("name")
         private val _name: String,
         @SerialName("url")
-        private val _url: String,
+        @Serializable(with = URISerializer::class)
+        private val _uri: java.net.URI,
         @SerialName("username")
         private val _username: String,
         @SerialName("password")
         private val _password: String
     ) {
         val name get() = _name.resolveEnv()
-        val url get() = _url.resolveEnv()
+        val uri get() = _uri
         val username get() = _username.resolveEnv()
         val password get() = _password.resolveEnv()
 
         init {
             require(name.isNotBlank()) { "A repository 'name' cannot be blank in the settings file." }
-            require(url.isNotBlank()) { "The 'url' for repository '$name' cannot be blank." }
+            requireNotNull(uri.scheme) { "The 'url' for repository '$name' must have a scheme (e.g. https)" }
+            requireNotNull(uri.host) { "The 'url' for repository '$name' must have a host." }
             require(username.isNotBlank()) { "The 'username' for repository '$name' cannot be blank." }
             require(password.isNotBlank()) { "The 'password' for repository '$name' cannot be blank." }
         }
 
-        enum class URL(val url: String) {
-            MAVEN_CENTRAL("https://s01.oss.sonatype.org/content/repositories/releases/"),
-            MAVEN_CENTRAL_SNAPSHOTS("https://s01.oss.sonatype.org/content/repositories/snapshots/"),
+        object URI {
+            val MAVEN_CENTRAL = URI("https://central.sonatype.com/api/v1/publisher/deploy")
         }
     }
 

@@ -66,7 +66,7 @@ abstract class UniPubGenerateTemplateSettingsTask : DefaultTask() {
                 repositories = listOf(
                     UniPubSettings.Repository(
                         "maven-central",
-                        UniPubSettings.Repository.URL.MAVEN_CENTRAL.url,
+                        UniPubSettings.Repository.URI.MAVEN_CENTRAL,
                         "YOUR_USERNAME",
                         "YOUR_PASSWORD"
                     )
