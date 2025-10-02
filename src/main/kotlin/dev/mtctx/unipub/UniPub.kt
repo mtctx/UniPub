@@ -66,27 +66,14 @@ class UniPub : Plugin<Project> {
             if (artifactInfos.isEmpty()) {
                 if (!components.names.contains("java")) {
                     throw GradleException(
-                        "UniPub: No 'java' component found. " +
-                                "Please apply either the 'java' or 'java-library' plugin in your build.gradle.kts, " +
-                                "or enable autoApplyJavaPlugin() in the unipub block."
+                        """
+                            UniPub: No 'java' component found.
+                            Please apply either the 'java' or 'java-library' plugin in your build.gradle.kts,
+                            or enable autoApplyJavaPlugin() in the unipub block.""".trimIndent()
                     )
                 }
 
                 artifactInfos = mutableListOf(ArtifactInfo.Component("java"))
-
-                val sourcesJar = tasks.findByName("sourcesJar")
-                if (sourcesJar != null) {
-                    artifactInfos.add(ArtifactInfo.Task(tasks.named("sourcesJar")))
-                } else {
-                    logger.warn("UniPub: 'sourcesJar' task not found, skipping.")
-                }
-
-                val javadocJar = tasks.findByName("javadocJar")
-                if (javadocJar != null) {
-                    artifactInfos.add(ArtifactInfo.Task(tasks.named("javadocJar")))
-                } else {
-                    logger.warn("UniPub: 'javadocJar' task not found, skipping.")
-                }
             }
 
             val settings = loadAndValidateSettingsFile(extension)
