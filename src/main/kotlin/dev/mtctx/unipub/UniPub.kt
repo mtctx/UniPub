@@ -46,24 +46,31 @@ class UniPub : Plugin<Project> {
             description = "Generate a template file for UniPub at $globalPath."
         }
 
+
+        val settings =
+            loadAndValidateSettingsFile(extension, projectPath(target.project.projectDir.absolutePath))
+        val profile = settings.profiles.find { it.name == extension.profileName }
+            ?: throw GradleException(
+                """
+                        Profile '${extension.profileName}' not found in settings file. Please check your settings file and try again.'
+                        Available profiles: ${settings.profiles.joinToString(", ") { it.name }}
+                        """.trimIndent()
+            )
+
+        val usesVanniktechMavenPublish = target.plugins.hasPlugin("com.vanniktech.maven.publish")
+        if (usesVanniktechMavenPublish) {
+            target.project.extensions.extraProperties["mavenCentralUsername"] = profile.username
+            target.project.extensions.extraProperties["mavenCentralPassword"] = profile.password
+            target.logger.lifecycle("UniPub: Injected Gradle properties for Vanniktech (profile '${profile.name}')")
+        }
+
         target.tasks.withType(PublishToMavenRepository::class.java).configureEach {
             doFirst {
                 if (repository.url.scheme == "file") return@doFirst
 
-                val settings =
-                    loadAndValidateSettingsFile(extension, projectPath(target.project.projectDir.absolutePath))
-                val profile = settings.profiles.find { it.name == extension.profileName }
-                    ?: throw GradleException(
-                        """
-                            Profile '${extension.profileName}' not found in settings file. Please check your settings file and try again.'
-                            Available profiles: ${settings.profiles.joinToString(", ") { it.name }}
-                            """.trimIndent()
-                    )
-
                 repository.credentials {
-                    username = username?.takeIf { it.isNotBlank() && it.isNotEmpty() } ?: profile.username.resolveEnv()
-                    password = password?.takeIf { it.isNotBlank() && it.isNotEmpty() } ?: profile.password.resolveEnv()
-
+                    username = username?.takeIf { it.isNotBlank() && it.isNotEmpty() } ?: profile.username
+                    password = password?.takeIf { it.isNotBlank() && it.isNotEmpty() } ?: profile.password
                 }
 
                 logger.lifecycle("UniPub: Injected credentials for profile '${profile.name}'")

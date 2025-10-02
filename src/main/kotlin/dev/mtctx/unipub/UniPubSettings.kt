@@ -32,15 +32,15 @@ data class UniPubSettings(
     @Serializable
     data class Profile(
         @SerialName("name")
-        private val _name: String,
+        private val rawName: String,
         @SerialName("username")
-        private val _username: String,
+        private val rawUsername: String,
         @SerialName("password")
-        private val _password: String
+        private val rawPassword: String
     ) {
-        val name get() = _name.resolveEnv()
-        val username get() = _username.resolveEnv()
-        val password get() = _password.resolveEnv()
+        val name get() = rawName.resolveEnv()
+        val username get() = rawUsername.resolveEnv()
+        val password get() = rawPassword.resolveEnv()
 
         init {
             require(name.isNotBlank()) { "A profile 'name' cannot be blank in the settings file." }
