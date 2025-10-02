@@ -25,8 +25,8 @@ import org.gradle.api.Project
 import org.gradle.api.model.ObjectFactory
 import org.gradle.api.provider.Property
 import org.gradle.kotlin.dsl.property
+import java.nio.file.Paths
 import javax.inject.Inject
-import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
 
 abstract class UniPubExtension @Inject constructor(objects: ObjectFactory, private val project: Project) {
@@ -49,7 +49,7 @@ abstract class UniPubExtension @Inject constructor(objects: ObjectFactory, priva
     private val developerInfos = mutableListOf<DeveloperInfo>()
     private val artifactInfos = mutableListOf<ArtifactInfo>()
     val uniPubSettingsFile: Property<String> = objects.property<String>().convention(
-        Path(System.getProperty("user.home"), "unipub", "main.unipub").absolutePathString()
+        Paths.get(System.getProperty("user.home"), ".unipub", "main.unipub").absolutePathString()
     )
 
     fun artifacts(block: ArtifactsBuilder.() -> Unit) {

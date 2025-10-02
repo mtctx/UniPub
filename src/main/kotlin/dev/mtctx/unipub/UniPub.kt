@@ -34,7 +34,7 @@ import org.gradle.kotlin.dsl.register
 import org.gradle.kotlin.dsl.withType
 import org.gradle.plugins.signing.SigningExtension
 import java.io.File
-import kotlin.io.path.Path
+import java.nio.file.Paths
 import kotlin.io.path.absolutePathString
 
 class UniPub : Plugin<Project> {
@@ -51,7 +51,7 @@ class UniPub : Plugin<Project> {
         target.tasks.register<UniPubGenerateTemplateSettingsInHomeDirTask>("generateSettingsFileInHomeDir") {
             group = "UniPub"
             description = "Generate a default settings file for UniPub in ${
-                Path(
+                Paths.get(
                     System.getProperty("user.home"),
                     ".unipub"
                 ).absolutePathString()

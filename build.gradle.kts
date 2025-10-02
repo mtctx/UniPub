@@ -25,7 +25,7 @@ plugins {
 }
 
 group = "dev.mtctx.unipub"
-version = "1.0.11"
+version = "1.0.12"
 
 repositories {
     mavenCentral()
