@@ -25,7 +25,7 @@ plugins {
 }
 
 group = "dev.mtctx.unipub"
-version = "1.0.0"
+version = "1.0.6"
 
 repositories {
     mavenCentral()
@@ -46,7 +46,7 @@ gradlePlugin {
             id = "dev.mtctx.unipub"
             displayName = "UniPub"
             description = "A Gradle plugin for publishing to Maven Repositories."
-            implementationClass = "dev.mtctx.unipub.UniPubKt"
+            implementationClass = "dev.mtctx.unipub.UniPub"
             tags = listOf(
                 "maven",
                 "central",

@@ -30,11 +30,25 @@ import kotlin.io.path.Path
 import kotlin.io.path.absolutePathString
 
 abstract class UniPubExtension @Inject constructor(objects: ObjectFactory, private val project: Project) {
-    private val projectInfo = objects.property<ProjectInfo>()
+    private var useInMemoryPgpKey: Boolean = false
+    private val projectInfo = objects.property<ProjectInfo>().convention(
+        ProjectInfo(
+            _name = project.name,
+            _id = project.name,
+            _description = project.description ?: "",
+            _version = project.version.toString(),
+            _inceptionYear = java.time.Year.now().toString(),
+            _groupId = project.group.toString(),
+            _url = "",
+            licenses = emptyList(),
+            scm = ProjectInfo.SCM("", "", "")
+        )
+    )
+
     private val developerInfos = mutableListOf<DeveloperInfo>()
     private val artifactInfos = mutableListOf<ArtifactInfo>()
     val uniPubSettingsFile: Property<String> = objects.property<String>().convention(
-        Path(System.getProperty("user.home"), "main.unipub").absolutePathString()
+        Path(System.getProperty("user.home"), "unipub", "main.unipub").absolutePathString()
     )
 
     fun artifacts(block: ArtifactsBuilder.() -> Unit) {
@@ -59,10 +73,18 @@ abstract class UniPubExtension @Inject constructor(objects: ObjectFactory, priva
         developerInfos.addAll(builder.build())
     }
 
-    internal fun projectInfo(): ProjectInfo = projectInfo.get()
+    fun useInMemoryPgpKey() {
+        useInMemoryPgpKey = true
+    }
+
+    internal fun isUsingMemoryPgpKey(): Boolean = useInMemoryPgpKey
+
+    internal fun projectInfo(): ProjectInfo =
+        projectInfo.orNull ?: error("UniPub: 'project { ... }' block must be configured")
+
     internal fun developerInfos(): List<DeveloperInfo> = developerInfos
     internal fun projectAndDeveloperInfos(): Pair<ProjectInfo, List<DeveloperInfo>> =
-        projectInfo.get() to developerInfos
+        projectInfo() to developerInfos
 
     internal fun artifactInfos(): List<ArtifactInfo> = artifactInfos
 }
