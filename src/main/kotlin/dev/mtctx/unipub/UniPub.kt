@@ -48,6 +48,8 @@ class UniPub : Plugin<Project> {
 
         target.tasks.withType(PublishToMavenRepository::class.java).configureEach {
             doFirst {
+                if (repository.url.scheme == "file") return@doFirst
+
                 val settings =
                     loadAndValidateSettingsFile(extension, projectPath(target.project.projectDir.absolutePath))
                 val profile = settings.profiles.find { it.name == extension.profileName }
