@@ -21,7 +21,7 @@ package dev.mtctx.unipub
 import okio.Path
 import okio.Path.Companion.toPath
 
-class UniPubExtension {
+open class UniPubExtension {
     internal var profileName: String = "primary"
     internal var unipubPath: Path = globalPath
 
