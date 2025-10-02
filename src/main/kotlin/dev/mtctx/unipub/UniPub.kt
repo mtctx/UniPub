@@ -59,8 +59,8 @@ class UniPub : Plugin<Project> {
 
         val usesVanniktechMavenPublish = target.plugins.hasPlugin("com.vanniktech.maven.publish")
         if (usesVanniktechMavenPublish) {
-            target.project.extensions.extraProperties["mavenCentralUsername"] = profile.username
-            target.project.extensions.extraProperties["mavenCentralPassword"] = profile.password
+            target.gradle.startParameter.projectProperties["mavenCentralUsername"] = profile.username
+            target.gradle.startParameter.projectProperties["mavenCentralPassword"] = profile.password
             target.logger.lifecycle("UniPub: Injected Gradle properties for Vanniktech (profile '${profile.name}')")
         }
 
