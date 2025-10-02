@@ -54,7 +54,7 @@ data class UniPubSettings(
         }
 
         enum class URL(val url: String) {
-            MAVEN_CENTRAL("https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/"),
+            MAVEN_CENTRAL("https://s01.oss.sonatype.org/content/repositories/releases/"),
             MAVEN_CENTRAL_SNAPSHOTS("https://s01.oss.sonatype.org/content/repositories/snapshots/"),
         }
     }

@@ -142,7 +142,7 @@ class UniPub : Plugin<Project> {
                 }
             }
 
-            val publication = publications.maybeCreate("mavenJava", MavenPublication::class.java)
+            val publication = publications.maybeCreate("unipub", MavenPublication::class.java)
 
             publication.groupId = projectInfo.groupId
             publication.artifactId = projectInfo.id
