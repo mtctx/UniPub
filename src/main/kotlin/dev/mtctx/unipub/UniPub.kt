@@ -68,7 +68,8 @@ class UniPub : Plugin<Project> {
                 if (!components.names.contains("java")) {
                     throw GradleException(
                         "UniPub: No 'java' component found. " +
-                                "Please apply either the 'java' or 'java-library' plugin in your build.gradle.kts."
+                                "Please apply either the 'java' or 'java-library' plugin in your build.gradle.kts, " +
+                                "or enable autoApplyJavaPlugin() in the unipub block."
                     )
                 }
 
