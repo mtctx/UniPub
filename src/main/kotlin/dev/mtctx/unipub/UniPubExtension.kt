@@ -31,6 +31,7 @@ import kotlin.io.path.absolutePathString
 
 abstract class UniPubExtension @Inject constructor(objects: ObjectFactory, private val project: Project) {
     private var useInMemoryPgpKey: Boolean = false
+    private var autoApplyJavaPlugin: Boolean = false
     private val projectInfo = objects.property<ProjectInfo>().convention(
         ProjectInfo(
             _name = project.name,
@@ -77,7 +78,12 @@ abstract class UniPubExtension @Inject constructor(objects: ObjectFactory, priva
         useInMemoryPgpKey = true
     }
 
+    fun autoApplyJavaPlugin() {
+        autoApplyJavaPlugin = true
+    }
+
     internal fun isUsingMemoryPgpKey(): Boolean = useInMemoryPgpKey
+    internal fun shouldAutoApplyJavaPlugin(): Boolean = autoApplyJavaPlugin
 
     internal fun projectInfo(): ProjectInfo =
         projectInfo.orNull ?: error("UniPub: 'project { ... }' block must be configured")

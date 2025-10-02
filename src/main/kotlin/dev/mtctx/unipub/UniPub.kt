@@ -59,10 +59,19 @@ class UniPub : Plugin<Project> {
         }
 
         target.afterEvaluate {
+            if (extension.shouldAutoApplyJavaPlugin()) project.pluginManager.apply("java-library")
+
             val (projectInfo, developerInfos) = extension.projectAndDeveloperInfos()
             var artifactInfos = extension.artifactInfos().toMutableList()
 
             if (artifactInfos.isEmpty()) {
+                if (!components.names.contains("java")) {
+                    throw GradleException(
+                        "UniPub: No 'java' component found. " +
+                                "Please apply either the 'java' or 'java-library' plugin in your build.gradle.kts."
+                    )
+                }
+
                 artifactInfos = mutableListOf(ArtifactInfo.Component("java"))
 
                 val sourcesJar = tasks.findByName("sourcesJar")
