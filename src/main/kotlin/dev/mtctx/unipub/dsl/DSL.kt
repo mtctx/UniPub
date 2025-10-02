@@ -56,8 +56,10 @@ class ProjectBuilder {
     var inceptionYear: String = ""
     var groupId: String = ""
     var url: String = ""
-    var licenses: List<License> = emptyList()
+    private var licenses: MutableList<License> = mutableListOf()
     private var scmBuilder: ScmBuilder? = null
+
+    fun licenses(vararg licenses: License) = this.licenses.addAll(licenses)
 
     fun scm(block: ScmBuilder.() -> Unit) {
         val builder = ScmBuilder()

@@ -31,7 +31,6 @@ import org.gradle.api.publish.maven.tasks.PublishToMavenRepository
 import org.gradle.kotlin.dsl.create
 import org.gradle.kotlin.dsl.getByType
 import org.gradle.kotlin.dsl.register
-import org.gradle.kotlin.dsl.withType
 import org.gradle.plugins.signing.SigningExtension
 import java.io.File
 import java.nio.file.Paths
@@ -156,69 +155,69 @@ class UniPub : Plugin<Project> {
                 }
             }
 
-            publications.withType<MavenPublication> {
-                groupId = projectInfo.groupId
-                artifactId = projectInfo.id
-                version = projectInfo.version
+            val publication = publications.maybeCreate("mavenJava", MavenPublication::class.java)
 
-                artifactInfos.forEach { artifactInfo ->
-                    when (artifactInfo) {
-                        is ArtifactInfo.Component -> {
-                            val component = components.findByName(artifactInfo.componentName)
-                            if (component != null) {
-                                from(component)
-                            } else {
-                                logger.warn("Component '${artifactInfo.componentName}' not found during publication")
-                            }
+            publication.groupId = projectInfo.groupId
+            publication.artifactId = projectInfo.id
+            publication.version = projectInfo.version
+
+            artifactInfos.forEach { artifactInfo ->
+                when (artifactInfo) {
+                    is ArtifactInfo.Component -> {
+                        val component = components.findByName(artifactInfo.componentName)
+                        if (component != null) {
+                            publication.from(component)
+                        } else {
+                            logger.warn("Component '${artifactInfo.componentName}' not found during publication")
+                        }
+                    }
+
+                    is ArtifactInfo.Task ->
+                        try {
+                            publication.artifact(artifactInfo.task)
+                        } catch (e: UnknownTaskException) {
+                            logger.error("Task not found: ${artifactInfo.task.name}")
+                            logger.trace("Stacktrace: ", e)
                         }
 
-                        is ArtifactInfo.Task ->
-                            try {
-                                artifact(artifactInfo.task)
-                            } catch (e: UnknownTaskException) {
-                                logger.error("Task not found: ${artifactInfo.task.name}")
-                                logger.trace("Stacktrace: ", e)
-                            }
+                    is ArtifactInfo.File ->
+                        publication.artifact(artifactInfo.file) {
+                            artifactInfo.classifier?.let { classifier = it }
+                        }
 
-                        is ArtifactInfo.File ->
-                            artifact(artifactInfo.file) {
-                                artifactInfo.classifier?.let { classifier = it }
-                            }
+                    is ArtifactInfo.Custom ->
+                        artifactInfo.configure(publication)
+                }
+            }
 
-                        is ArtifactInfo.Custom ->
-                            artifactInfo.configure(this)
+            publication.pom {
+                name.set(projectInfo.name)
+                description.set(projectInfo.description)
+                inceptionYear.set(projectInfo.inceptionYear)
+                url.set(projectInfo.url)
+                licenses {
+                    projectInfo.licenses.forEach { licenseInfo ->
+                        license {
+                            name.set(licenseInfo.name)
+                            url.set(licenseInfo.url)
+                            distribution.set(licenseInfo.distribution.value)
+                        }
                     }
                 }
-
-                pom {
-                    name.set(projectInfo.name)
-                    description.set(projectInfo.description)
-                    inceptionYear.set(projectInfo.inceptionYear)
-                    url.set(projectInfo.url)
-                    licenses {
-                        projectInfo.licenses.forEach { licenseInfo ->
-                            license {
-                                name.set(licenseInfo.name)
-                                url.set(licenseInfo.url)
-                                distribution.set(licenseInfo.distribution.value)
-                            }
+                developers {
+                    developerInfos.forEach { developerInfo ->
+                        developer {
+                            name.set(developerInfo.name)
+                            email.set(developerInfo.email)
+                            organization.set(developerInfo.organization)
+                            organizationUrl.set(developerInfo.organizationUrl)
                         }
                     }
-                    developers {
-                        developerInfos.forEach { developerInfo ->
-                            developer {
-                                name.set(developerInfo.name)
-                                email.set(developerInfo.email)
-                                organization.set(developerInfo.organization)
-                                organizationUrl.set(developerInfo.organizationUrl)
-                            }
-                        }
-                    }
-                    scm {
-                        url.set(projectInfo.scm.url)
-                        connection.set(projectInfo.scm.connection)
-                        developerConnection.set(projectInfo.scm.developerConnection)
-                    }
+                }
+                scm {
+                    url.set(projectInfo.scm.url)
+                    connection.set(projectInfo.scm.connection)
+                    developerConnection.set(projectInfo.scm.developerConnection)
                 }
             }
         }

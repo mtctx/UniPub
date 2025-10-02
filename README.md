@@ -106,7 +106,7 @@ unipub {
         inceptionYear = "2025"
         url = "https://github.com/example/awesome-lib"
 
-        licenses = listOf(License.APACHE_2_0)
+        licenses(License.APACHE_2_0)
 
         scm {
             url = "https://github.com/example/awesome-lib"
@@ -153,10 +153,7 @@ unipub {
         url = "https://github.com/corporate/awesome-library"
 
         // Multiple licenses
-        licenses = listOf(
-            License.APACHE_2_0,
-            License.MIT
-        )
+        licenses(License.APACHE_2_0, License.MIT)
 
         scm {
             url = "https://github.com/corporate/awesome-library"
