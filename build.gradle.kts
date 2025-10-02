@@ -25,7 +25,7 @@ plugins {
 }
 
 group = "dev.mtctx.unipub"
-version = "1.0.16"
+version = "2.0.0"
 
 repositories {
     mavenCentral()
@@ -33,8 +33,8 @@ repositories {
 }
 
 dependencies {
+    implementation("com.squareup.okio:okio:3.16.0")
     implementation("com.charleskorn.kaml:kaml:0.95.0")
-    testImplementation(kotlin("test"))
 }
 
 gradlePlugin {
@@ -42,7 +42,7 @@ gradlePlugin {
     vcsUrl = "https://github.com/mtctx/UniPub.git"
 
     plugins {
-        create("unipub") {
+        register("unipub") {
             id = "dev.mtctx.unipub"
             displayName = "UniPub"
             description = "A Gradle plugin for publishing to Maven Repositories."

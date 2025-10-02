@@ -18,79 +18,20 @@
 
 package dev.mtctx.unipub
 
-import dev.mtctx.unipub.dsl.ArtifactsBuilder
-import dev.mtctx.unipub.dsl.DevelopersBuilder
-import dev.mtctx.unipub.dsl.ProjectBuilder
-import org.gradle.api.Project
-import org.gradle.api.model.ObjectFactory
-import org.gradle.api.provider.Property
-import org.gradle.kotlin.dsl.property
-import java.nio.file.Paths
-import javax.inject.Inject
-import kotlin.io.path.absolutePathString
+import okio.Path
+import okio.Path.Companion.toPath
 
-abstract class UniPubExtension @Inject constructor(objects: ObjectFactory, private val project: Project) {
-    private var useInMemoryPgpKey: Boolean = false
-    private var autoApplyJavaPlugin: Boolean = false
-    private val projectInfo = objects.property<ProjectInfo>().convention(
-        ProjectInfo(
-            _name = project.name,
-            _id = project.name,
-            _description = project.description ?: "",
-            _version = project.version.toString(),
-            _inceptionYear = java.time.Year.now().toString(),
-            _groupId = project.group.toString(),
-            _url = "",
-            licenses = emptyList(),
-            scm = ProjectInfo.SCM("", "", "")
-        )
-    )
+class UniPubExtension {
+    internal var profileName: String = "primary"
+    internal var unipubPath: Path = globalPath
 
-    private val developerInfos = mutableListOf<DeveloperInfo>()
-    private val artifactInfos = mutableListOf<ArtifactInfo>()
-    val uniPubSettingsFile: Property<String> = objects.property<String>().convention(
-        Paths.get(System.getProperty("user.home"), ".unipub", "main.unipub").absolutePathString()
-    )
-
-    fun artifacts(block: ArtifactsBuilder.() -> Unit) {
-        val builder = ArtifactsBuilder()
-        builder.block()
-        artifactInfos.addAll(builder.build())
+    fun profile(name: String) {
+        profileName = name.resolveEnv()
     }
 
-    fun project(block: ProjectBuilder.() -> Unit) {
-        val builder = ProjectBuilder()
-        builder.block()
-        builder.apply {
-            if (version.isBlank()) version = project.version.toString()
-            if (groupId.isBlank()) groupId = project.group.toString()
-        }
-        projectInfo.set(builder.build())
+    fun unipubPath(path: String) = unipubPath(fs.canonicalize(path.resolveEnv().toPath()))
+
+    fun unipubPath(path: Path) {
+        unipubPath = path
     }
-
-    fun developers(block: DevelopersBuilder.() -> Unit) {
-        val builder = DevelopersBuilder()
-        builder.block()
-        developerInfos.addAll(builder.build())
-    }
-
-    fun useInMemoryPgpKey() {
-        useInMemoryPgpKey = true
-    }
-
-    fun autoApplyJavaPlugin() {
-        autoApplyJavaPlugin = true
-    }
-
-    internal fun isUsingMemoryPgpKey(): Boolean = useInMemoryPgpKey
-    internal fun shouldAutoApplyJavaPlugin(): Boolean = autoApplyJavaPlugin
-
-    internal fun projectInfo(): ProjectInfo =
-        projectInfo.orNull ?: error("UniPub: 'project { ... }' block must be configured")
-
-    internal fun developerInfos(): List<DeveloperInfo> = developerInfos
-    internal fun projectAndDeveloperInfos(): Pair<ProjectInfo, List<DeveloperInfo>> =
-        projectInfo() to developerInfos
-
-    internal fun artifactInfos(): List<ArtifactInfo> = artifactInfos
 }

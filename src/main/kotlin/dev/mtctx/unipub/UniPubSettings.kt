@@ -18,61 +18,34 @@
 
 package dev.mtctx.unipub
 
-import dev.mtctx.unipub.serializer.URISerializer
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import java.net.URI
 
 @Serializable
 data class UniPubSettings(
-    val repositories: List<Repository>,
-    val gpgKey: GpgKey? = null
+    val profiles: List<Profile>
 ) {
     init {
-        require(repositories.isNotEmpty()) { "Repository list in settings file cannot be empty" }
+        require(profiles.isNotEmpty()) { "Repository list in settings file cannot be empty" }
     }
 
     @Serializable
-    data class Repository(
+    data class Profile(
         @SerialName("name")
         private val _name: String,
-        @SerialName("url")
-        @Serializable(with = URISerializer::class)
-        private val _uri: java.net.URI,
         @SerialName("username")
         private val _username: String,
         @SerialName("password")
         private val _password: String
     ) {
         val name get() = _name.resolveEnv()
-        val uri get() = _uri
         val username get() = _username.resolveEnv()
         val password get() = _password.resolveEnv()
 
         init {
-            require(name.isNotBlank()) { "A repository 'name' cannot be blank in the settings file." }
-            requireNotNull(uri.scheme) { "The 'url' for repository '$name' must have a scheme (e.g. https)" }
-            requireNotNull(uri.host) { "The 'url' for repository '$name' must have a host." }
-            require(username.isNotBlank()) { "The 'username' for repository '$name' cannot be blank." }
-            require(password.isNotBlank()) { "The 'password' for repository '$name' cannot be blank." }
+            require(name.isNotBlank()) { "A profile 'name' cannot be blank in the settings file." }
+            require(username.isNotBlank()) { "The 'username' for profile '$name' cannot be blank." }
+            require(password.isNotBlank()) { "The 'password' for profile '$name' cannot be blank." }
         }
-
-        object URI {
-            val MAVEN_CENTRAL = URI("https://central.sonatype.com/api/v1/publisher/deploy")
-        }
-    }
-
-    @Serializable
-    data class GpgKey(
-        @SerialName("keyId")
-        private val _keyId: String? = null,
-        @SerialName("passphrase")
-        private val _passphrase: String? = null,
-        @SerialName("privateKey")
-        private val _privateKey: String? = null,
-    ) {
-        val keyId get() = _keyId?.resolveEnv().orEmpty()
-        val passphrase get() = _passphrase?.resolveEnv().orEmpty()
-        val privateKey get() = _privateKey?.resolveEnv().orEmpty()
     }
 }
