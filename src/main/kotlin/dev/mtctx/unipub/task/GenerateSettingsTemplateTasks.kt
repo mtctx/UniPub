@@ -26,7 +26,7 @@ import org.gradle.api.tasks.TaskAction
 import java.io.File
 import kotlin.io.path.Path
 
-class UniPubGenerateTemplateSettingsInProjectDirTask : UniPubGenerateTemplateSettingsTask() {
+open class UniPubGenerateTemplateSettingsInProjectDirTask : UniPubGenerateTemplateSettingsTask() {
     override fun file(profileName: String): File = File(project.projectDir, "$profileName.unipub")
 
     @TaskAction
