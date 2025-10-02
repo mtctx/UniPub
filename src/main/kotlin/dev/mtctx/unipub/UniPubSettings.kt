@@ -24,7 +24,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class UniPubSettings(
     val repositories: List<Repository>,
-    val gpgKey: GpgKey
+    val gpgKey: GpgKey? = null
 ) {
     init {
         require(repositories.isNotEmpty()) { "Repository list in settings file cannot be empty" }
@@ -62,20 +62,14 @@ data class UniPubSettings(
     @Serializable
     data class GpgKey(
         @SerialName("keyId")
-        private val _keyId: String,
+        private val _keyId: String? = null,
         @SerialName("passphrase")
-        private val _passphrase: String,
+        private val _passphrase: String? = null,
         @SerialName("privateKey")
-        private val _privateKey: String,
+        private val _privateKey: String? = null,
     ) {
-        val keyId get() = _keyId.resolveEnv()
-        val passphrase get() = _passphrase.resolveEnv()
-        val privateKey get() = _privateKey.resolveEnv()
-
-        init {
-            require(keyId.isNotBlank()) { "GPG 'keyId' cannot be blank in the settings file." }
-            require(passphrase.isNotBlank()) { "GPG 'passphrase' cannot be blank in the settings file." }
-            require(privateKey.isNotBlank()) { "GPG 'privateKey' cannot be blank in the settings file." }
-        }
+        val keyId get() = _keyId?.resolveEnv().orEmpty()
+        val passphrase get() = _passphrase?.resolveEnv().orEmpty()
+        val privateKey get() = _privateKey?.resolveEnv().orEmpty()
     }
 }

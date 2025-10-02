@@ -110,10 +110,20 @@ class UniPub : Plugin<Project> {
             "UniPub settings file not found at path: ${settingsFile.absolutePath}"
         }
 
-        return Yaml.default.decodeFromString(
+        val settings = Yaml.default.decodeFromString(
             UniPubSettings.serializer(),
             settingsFile.readText()
         )
+
+        if (extension.isUsingMemoryPgpKey()) {
+            val gpg = settings.gpgKey
+                ?: throw GradleException("UniPub: GPG config must be provided when using in-memory PGP keys.")
+            require(gpg.keyId.isNotBlank()) { "GPG 'keyId' cannot be blank when using in-memory PGP." }
+            require(gpg.passphrase.isNotBlank()) { "GPG 'passphrase' cannot be blank when using in-memory PGP." }
+            require(gpg.privateKey.isNotBlank()) { "GPG 'privateKey' cannot be blank when using in-memory PGP." }
+        }
+
+        return settings
     }
 
     private fun Project.configurePublishing(
@@ -226,7 +236,7 @@ class UniPub : Plugin<Project> {
             if (!useInMemoryPgpKey) {
                 useGpgCmd()
                 sign(publishing.publications)
-            } else if (settings.gpgKey.keyId.isNotBlank() && settings.gpgKey.privateKey.isNotBlank()) {
+            } else if (settings.gpgKey?.keyId?.isNotBlank() == true && settings.gpgKey.privateKey.isNotBlank()) {
                 useInMemoryPgpKeys(
                     settings.gpgKey.keyId,
                     settings.gpgKey.privateKey,
