@@ -58,9 +58,9 @@ class UniPub : Plugin<Project> {
             )
 
         target.pluginManager.withPlugin("com.vanniktech.maven.publish") {
-            target.extensions.extraProperties.set("mavenCentralUsername", profile.username)
-            target.extensions.extraProperties.set("mavenCentralPassword", profile.password)
-            target.logger.lifecycle("UniPub: Injected Gradle properties for Vanniktech (profile '${profile.name}')")
+            System.setProperty("org.gradle.project.mavenCentralUsername", profile.username)
+            System.setProperty("org.gradle.project.mavenCentralPassword", profile.password)
+            target.logger.lifecycle("> UniPub: Injected Gradle properties for Vanniktech (profile '${profile.name}')")
         }
 
         target.tasks.withType(PublishToMavenRepository::class.java).configureEach {
@@ -72,7 +72,7 @@ class UniPub : Plugin<Project> {
                     password = password?.takeIf { it.isNotBlank() && it.isNotEmpty() } ?: profile.password
                 }
 
-                logger.lifecycle("UniPub: Injected credentials for profile '${profile.name}'")
+                logger.lifecycle("> UniPub: Injected credentials for profile '${profile.name}'")
             }
         }
     }
